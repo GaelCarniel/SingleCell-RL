@@ -1,0 +1,286 @@
+---
+title: "Reinforcement Learning"
+format: html
+editor: visual
+---
+
+# Reinforcement learning on SingleCell task
+
+### The simplest model:
+
+$V_{t+1} = V_t + \alpha PE$ ,
+
+with $PE = R_t-V_t$ ,
+
+with $V_t$ perceived value at the time $t$ and $R_t$ the feedback 1 for win 0 for loosing. <br><br> *Here the value of* $V_t$ is personal for an oponent that means we will have to run independant RL model for each oponent. We might think of some dependencies later. Exemple : when I update the value of one oponent does it affects the values of the other oponents.
+
+```{r}
+RL <- function(V, R, alpha = .2){
+  return (V+alpha*(R-V))
+}
+```
+
+Prepare python env
+
+```{r}
+library(reticulate)
+
+
+```
+
+<!-- Import packages required python librairies: -->
+
+<!-- ```{python} -->
+
+<!-- import numpy as np -->
+
+<!-- import random -->
+
+<!-- import matplotlib.pyplot as plt -->
+
+<!-- import pandas as pd -->
+
+<!-- ``` -->
+
+<!-- ```{python} -->
+
+<!-- def RL(V, R, alpha = .3): -->
+
+<!--   return V+alpha*(R-V); -->
+
+<!-- ``` -->
+
+<!-- Let's try to simulate some behavior -->
+
+<!-- ```{python} -->
+
+<!-- p = 0.7; n =100; -->
+
+<!-- R = np.random.choice([0, 1], size=n, p=[1-p,p]); -->
+
+<!-- print(sum(R)) -->
+
+<!-- V_init = .5; -->
+
+<!-- V = np.zeros(len(R));V1 = np.zeros(len(R));V2 = np.zeros(len(R));V3 = np.zeros(len(R)); -->
+
+<!-- v = V_init;v1 = V_init; v2 = V_init; v3 = V_init; -->
+
+<!-- for i in range(len(R)): -->
+
+<!--   v = RL(v,R[i]); -->
+
+<!--   v1 = RL(v1,R[i],alpha=.1); -->
+
+<!--   v2 = RL(v2,R[i],alpha=.02); -->
+
+<!--   v3 = RL(v3,R[i],alpha=.005); -->
+
+<!--   V[i]=v; V1[i]=v1; V2[i]=v2; V3[i]=v3; -->
+
+<!-- plt.title("Comparison of alphas for a RL model"); -->
+
+<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V)),label="Alpha .3"); -->
+
+<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V1)),label="Alpha .1"); -->
+
+<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V2)),label="Alpha .05"); -->
+
+<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V3)),label="Alpha .005"); -->
+
+<!-- plt.axhline(y=p, color='black', linestyle='--'); -->
+
+<!-- plt.legend(); -->
+
+<!-- ``` -->
+
+<!-- Same but with 30 bots averaged -->
+
+<!-- ```{python} -->
+
+<!-- p = 0.7; n =100; -->
+
+<!-- rep = 30; -->
+
+<!-- Alphas =[0.2,.1,.02,.005]; -->
+
+<!-- V_init = .5; -->
+
+<!-- V = np.zeros((len(R),rep)); -->
+
+<!-- V1 = np.zeros((len(R),rep));V2 = np.zeros((len(R),rep));V3 = np.zeros((len(R),rep)); -->
+
+<!-- for r in range(rep): -->
+
+<!--   R = np.random.choice([0, 1], size=n, p=[1-p,p]); -->
+
+<!--   v = V_init;v1 = V_init; v2 = V_init; v3 = V_init; -->
+
+<!--   for i in range(len(R)): -->
+
+<!--     v = RL(v,R[i],alpha = Alphas[0]); -->
+
+<!--     v1 = RL(v1,R[i],alpha = Alphas[1]); -->
+
+<!--     v2 = RL(v2,R[i],alpha = Alphas[2]); -->
+
+<!--     v3 = RL(v3,R[i],alpha = Alphas[3]); -->
+
+<!--     V[i,r]=v;V1[i,r]=v1; V2[i,r]=v2; V3[i,r]=v3; -->
+
+<!-- plt.title("Comparison of alphas for a RL model"); -->
+
+<!-- RLs = list([V,V1,V2,V3]) -->
+
+<!-- for i in range(len(Alphas)): -->
+
+<!--   Vx = RLs[i] -->
+
+<!--   alpha = Alphas[i]; -->
+
+<!--   plt.plot(np.arange(0,101),np.concatenate(([V_init], np.mean(Vx,axis=1))),label=f"Alpha {alpha}"); -->
+
+<!-- plt.axhline(y=p, color='black', linestyle='--'); -->
+
+<!-- plt.legend(); -->
+
+<!-- ``` -->
+
+## Real data:
+
+Now I will import data from *pat_02495_0949*:
+
+The treatment will be done in R for this time.
+
+```{r}
+pat_files = list.files(path="TrialbyTrial/")
+pat = read.table(file=paste0("TrialbyTrial/",pat_files[1]),sep=",",header=T)
+
+print(paste0("Patient: ",pat_files[1]," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks."))#Sanity check this should be an integer
+
+pat$Trial = ifelse(pat$Trial>45,pat$Trial-45,pat$Trial) #Correction of data collection 
+```
+
+This patient did 6 blocks let's run 6 RL models ($V_{t+1} = V_t + \alpha (R_t-V_t)$):
+
+```{r}
+V_init = 0.5
+V = matrix(NA,45,dim(pat)[1]/45)
+conditions = matrix(NA,2,dim(pat)[1]/45)
+
+for (i in 1:(dim(pat)[1]/45)){
+  v = V_init
+  sub = pat[((i-1)*45+1):((i-1)*45+45),]
+  R = sub$WinLose
+  for(t in 1:45){
+    v = RL(v,R[t],0.2)
+    V[t,i] = v 
+  }
+  #Here it should be only one everytime but as sanity check I'll put unique()
+  conditions[1,i] = unique(sub$WinProb)
+  conditions[2,i] = unique(sub$Condition)
+}
+
+V = rbind(rep(V_init,dim(pat)[1]/45),V)
+```
+
+Graphical representation of these 6 RL
+
+```{r}
+colours = c("#1f77b4","#ff7f0e","#2ca02c")
+cond = ifelse(conditions[1,]=="low",1,ifelse(conditions[1,]=="med",2,3))
+
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL demonstration",ylab = "Oponent Value",xlab="Trials")
+
+for (i in 1:ncol(V)) {
+  lines(0:45, V[, i],col = colours[cond[i]],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
+By averaging on conditions:
+
+```{r}
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL demonstration",ylab = "Oponent Value",xlab="Trials")
+
+cond = levels(as.factor(conditions[1,]))[c(2,3,1)]#To obtain Low Med High
+for (i in 1:length(cond)){
+  y = rowMeans(V[,which(conditions[1,]==cond[i])])
+  lines(0:45,y ,col = colours[i],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
+## For every participant
+
+```{r}
+pat_files = list.files(path="TrialbyTrial/")#Files of all participants
+
+V_stack = NULL
+
+for (p in 1:length(pat_files)){
+  #Read data
+  pat = read.table(file=paste0("TrialbyTrial/",pat_files[p]),sep=",",header=T)
+  pat_name = paste(strsplit(pat_files[p],split = "_")[[1]][2:4],collapse = "_")
+  print(paste0("Processing patient: ",pat_name," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks...."))#Sanity check this should be an integer
+  if ((dim(pat)[1]/45)%%1!=0){
+    print("Skipped error in data")
+  }else{
+    
+    pat$Trial = ifelse(pat$Trial>45,pat$Trial-45,pat$Trial) #Correction of data collection 
+    
+    
+    #Simulation RL 
+    V_init = 0.5
+    V = matrix(NA,dim(pat)[1]/45,45)
+    conditions = matrix(NA,dim(pat)[1]/45,2)
+    
+    for (i in 1:(dim(pat)[1]/45)){
+      v = V_init
+      sub = pat[((i-1)*45+1):((i-1)*45+45),]
+      R = sub$WinLose
+      for(t in 1:45){
+        v = RL(v,R[t],0.2)
+        V[i,t] = v 
+      }
+      #Here it should be only one everytime but as sanity check I'll put unique()
+      conditions[i,1] = unique(sub$WinProb)
+      conditions[i,2] = unique(sub$Condition)
+    }
+    
+    V = cbind(rep(pat_name,dim(conditions)[1]),conditions,rep(V_init,dim(pat)[1]/45),V)
+    
+    V_stack = rbind(V_stack,V)
+  }
+}
+
+V_stack = as.data.frame(V_stack)
+
+
+
+
+```
+
+```{r}
+
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL demonstration",ylab = "Oponent Value",xlab="Trials")
+
+cond = levels(as.factor(conditions[,1]))[c(2,3,1)]#To obtain Low Med High
+for (i in 1:length(cond)){
+  sub = subset(V_stack[,4:dim(V_stack)[2]],V_stack[,2]==cond[i])
+  #print(paste("Condition:",cond[i],dim(sub)[1],"rows."))
+  
+  #To ensure that everything is numeric
+  sub1 <- as.data.frame(sub)
+  sub1[] <- lapply(sub1, as.numeric)
+  y = colMeans(sub1) 
+  
+  lines(0:45,y ,col = colours[i],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
+## Now let's see if there is a correlation between $PE$ and the number of spykes by trial
