@@ -24,127 +24,86 @@ Prepare python env
 
 ```{r}
 library(reticulate)
+```
 
+Import packages required python librairies:
+
+```{python}
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+import pandas as pd
+```
+
+```{python}
+def RL(V, R, alpha = .3):
+  return V+alpha*(R-V);
+```
+
+Let's try to simulate some behavior
+
+```{python}
+p = 0.7; n =100;
+R = np.random.choice([0, 1], size=n, p=[1-p,p]);
+print(sum(R))
+V_init = .5;
+V = np.zeros(len(R));V1 = np.zeros(len(R));V2 = np.zeros(len(R));V3 = np.zeros(len(R));
+v = V_init;v1 = V_init; v2 = V_init; v3 = V_init;
+for i in range(len(R)):
+  v = RL(v,R[i]);
+  v1 = RL(v1,R[i],alpha=.1);
+  v2 = RL(v2,R[i],alpha=.02);
+  v3 = RL(v3,R[i],alpha=.005);
+
+  V[i]=v; V1[i]=v1; V2[i]=v2; V3[i]=v3;
+
+plt.title("Comparison of alphas for a RL model");
+plt.plot(np.arange(0,101),np.concatenate(([V_init], V)),label="Alpha .3");
+plt.plot(np.arange(0,101),np.concatenate(([V_init], V1)),label="Alpha .1");
+plt.plot(np.arange(0,101),np.concatenate(([V_init], V2)),label="Alpha .05");
+plt.plot(np.arange(0,101),np.concatenate(([V_init], V3)),label="Alpha .005");
+plt.axhline(y=p, color='black', linestyle='--');
+
+plt.legend();
+plt.show();
 
 ```
 
-<!-- Import packages required python librairies: -->
+Same but with 30 bots averaged
 
-<!-- ```{python} -->
+```{python}
+p = 0.7; n =100;
+rep = 30;
+Alphas =[0.2,.1,.02,.005];
+V_init = .5;
+V = np.zeros((len(R),rep));
+V1 = np.zeros((len(R),rep));V2 = np.zeros((len(R),rep));V3 = np.zeros((len(R),rep));
 
-<!-- import numpy as np -->
+for r in range(rep):
+  R = np.random.choice([0, 1], size=n, p=[1-p,p]);
+  v = V_init;v1 = V_init; v2 = V_init; v3 = V_init;
+  for i in range(len(R)):
+    v = RL(v,R[i],alpha = Alphas[0]);
+    v1 = RL(v1,R[i],alpha = Alphas[1]);
+    v2 = RL(v2,R[i],alpha = Alphas[2]);
+    v3 = RL(v3,R[i],alpha = Alphas[3]);
+    
+    V[i,r]=v;V1[i,r]=v1; V2[i,r]=v2; V3[i,r]=v3;
 
-<!-- import random -->
+plt.title("Comparison of alphas for a RL model");
 
-<!-- import matplotlib.pyplot as plt -->
+RLs = list([V,V1,V2,V3])
+for i in range(len(Alphas)):
+  Vx = RLs[i]
+  alpha = Alphas[i];
 
-<!-- import pandas as pd -->
+  plt.plot(np.arange(0,101),np.concatenate(([V_init],np.mean(Vx,axis=1))),label=f"Alpha {alpha}");
+  
+plt.axhline(y=p, color='black', linestyle='--');
+plt.legend();
+plt.show();
 
-<!-- ``` -->
-
-<!-- ```{python} -->
-
-<!-- def RL(V, R, alpha = .3): -->
-
-<!--   return V+alpha*(R-V); -->
-
-<!-- ``` -->
-
-<!-- Let's try to simulate some behavior -->
-
-<!-- ```{python} -->
-
-<!-- p = 0.7; n =100; -->
-
-<!-- R = np.random.choice([0, 1], size=n, p=[1-p,p]); -->
-
-<!-- print(sum(R)) -->
-
-<!-- V_init = .5; -->
-
-<!-- V = np.zeros(len(R));V1 = np.zeros(len(R));V2 = np.zeros(len(R));V3 = np.zeros(len(R)); -->
-
-<!-- v = V_init;v1 = V_init; v2 = V_init; v3 = V_init; -->
-
-<!-- for i in range(len(R)): -->
-
-<!--   v = RL(v,R[i]); -->
-
-<!--   v1 = RL(v1,R[i],alpha=.1); -->
-
-<!--   v2 = RL(v2,R[i],alpha=.02); -->
-
-<!--   v3 = RL(v3,R[i],alpha=.005); -->
-
-<!--   V[i]=v; V1[i]=v1; V2[i]=v2; V3[i]=v3; -->
-
-<!-- plt.title("Comparison of alphas for a RL model"); -->
-
-<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V)),label="Alpha .3"); -->
-
-<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V1)),label="Alpha .1"); -->
-
-<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V2)),label="Alpha .05"); -->
-
-<!-- plt.plot(np.arange(0,101),np.concatenate(([V_init], V3)),label="Alpha .005"); -->
-
-<!-- plt.axhline(y=p, color='black', linestyle='--'); -->
-
-<!-- plt.legend(); -->
-
-<!-- ``` -->
-
-<!-- Same but with 30 bots averaged -->
-
-<!-- ```{python} -->
-
-<!-- p = 0.7; n =100; -->
-
-<!-- rep = 30; -->
-
-<!-- Alphas =[0.2,.1,.02,.005]; -->
-
-<!-- V_init = .5; -->
-
-<!-- V = np.zeros((len(R),rep)); -->
-
-<!-- V1 = np.zeros((len(R),rep));V2 = np.zeros((len(R),rep));V3 = np.zeros((len(R),rep)); -->
-
-<!-- for r in range(rep): -->
-
-<!--   R = np.random.choice([0, 1], size=n, p=[1-p,p]); -->
-
-<!--   v = V_init;v1 = V_init; v2 = V_init; v3 = V_init; -->
-
-<!--   for i in range(len(R)): -->
-
-<!--     v = RL(v,R[i],alpha = Alphas[0]); -->
-
-<!--     v1 = RL(v1,R[i],alpha = Alphas[1]); -->
-
-<!--     v2 = RL(v2,R[i],alpha = Alphas[2]); -->
-
-<!--     v3 = RL(v3,R[i],alpha = Alphas[3]); -->
-
-<!--     V[i,r]=v;V1[i,r]=v1; V2[i,r]=v2; V3[i,r]=v3; -->
-
-<!-- plt.title("Comparison of alphas for a RL model"); -->
-
-<!-- RLs = list([V,V1,V2,V3]) -->
-
-<!-- for i in range(len(Alphas)): -->
-
-<!--   Vx = RLs[i] -->
-
-<!--   alpha = Alphas[i]; -->
-
-<!--   plt.plot(np.arange(0,101),np.concatenate(([V_init], np.mean(Vx,axis=1))),label=f"Alpha {alpha}"); -->
-
-<!-- plt.axhline(y=p, color='black', linestyle='--'); -->
-
-<!-- plt.legend(); -->
-
-<!-- ``` -->
+```
 
 ## Real data:
 
@@ -218,7 +177,7 @@ legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.
 ```{r}
 pat_files = list.files(path="TrialbyTrial/")#Files of all participants
 
-V_stack = NULL
+V_stack = NULL;PE_stack = NULL;
 
 for (p in 1:length(pat_files)){
   #Read data
@@ -235,6 +194,7 @@ for (p in 1:length(pat_files)){
     #Simulation RL 
     V_init = 0.5
     V = matrix(NA,dim(pat)[1]/45,45)
+    PE = matrix(NA,dim(pat)[1]/45,45)
     conditions = matrix(NA,dim(pat)[1]/45,2)
     
     for (i in 1:(dim(pat)[1]/45)){
@@ -243,7 +203,9 @@ for (p in 1:length(pat_files)){
       R = sub$WinLose
       for(t in 1:45){
         v = RL(v,R[t],0.2)
-        V[i,t] = v 
+        PE[i,t] = R[t]-v
+        V[i,t] = v
+        
       }
       #Here it should be only one everytime but as sanity check I'll put unique()
       conditions[i,1] = unique(sub$WinProb)
@@ -251,8 +213,10 @@ for (p in 1:length(pat_files)){
     }
     
     V = cbind(rep(pat_name,dim(conditions)[1]),conditions,rep(V_init,dim(pat)[1]/45),V)
+    PE = cbind(rep(pat_name,dim(conditions)[1]),conditions,rep(NA,dim(pat)[1]/45),PE)
     
     V_stack = rbind(V_stack,V)
+    PE_stack = rbind(PE_stack,PE)
   }
 }
 
