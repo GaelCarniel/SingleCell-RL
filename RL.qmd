@@ -20,6 +20,8 @@ RL <- function(V, R, alpha = .2){
 }
 ```
 
+````{=html}
+<!-- Je n'ai pas de moteur python sur le PC du boulot je le compilerais de chez moi mais en attendant 
 Prepare python env
 
 ```{r}
@@ -105,6 +107,9 @@ plt.show();
 
 ```
 
+-->
+````
+
 ## Real data:
 
 Now I will import data from *pat_02495_0949*:
@@ -112,7 +117,7 @@ Now I will import data from *pat_02495_0949*:
 The treatment will be done in R for this time.
 
 ```{r}
-pat_files = list.files(path="TrialbyTrial/")
+pat_files = list.files(path="TrialbyTrial/",pattern = "PostSpikes")
 pat = read.table(file=paste0("TrialbyTrial/",pat_files[1]),sep=",",header=T)
 
 print(paste0("Patient: ",pat_files[1]," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks."))#Sanity check this should be an integer
@@ -175,7 +180,7 @@ legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.
 ## For every participant
 
 ```{r}
-pat_files = list.files(path="TrialbyTrial/")#Files of all participants
+pat_files = list.files(path="TrialbyTrial/",pattern="PostSpikes")#Files of all participants only for the activation pôst stim
 
 V_stack = NULL;PE_stack = NULL;
 
@@ -207,7 +212,7 @@ for (p in 1:length(pat_files)){
         V[i,t] = v
         
       }
-      #Here it should be only one everytime but as sanity check I'll put unique()
+      #Here it should be only one everytime but as sanity check I'll put unique() (it will bug if there is more than one item)
       conditions[i,1] = unique(sub$WinProb)
       conditions[i,2] = unique(sub$Condition)
     }
@@ -229,7 +234,7 @@ V_stack = as.data.frame(V_stack)
 
 ```{r}
 
-plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL demonstration",ylab = "Oponent Value",xlab="Trials")
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL simulation",ylab = "Oponent Value (averaged)",xlab="Trials")
 
 cond = levels(as.factor(conditions[,1]))[c(2,3,1)]#To obtain Low Med High
 for (i in 1:length(cond)){
@@ -247,4 +252,103 @@ abline(h = seq(.25,.75,.25),col = colours,lty=2)
 legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
 ```
 
-## Now let's see if there is a correlation between $PE$ and the number of spykes by trial
+## Now let's see if there is a correlation between $PE$ and the number of spikes by trial
+
+### Table management:
+
+```{r}
+
+for (p in 1:length(pat_files)){
+  pat = read.table(file=paste0("TrialbyTrial/",pat_files[p]),sep=",",header=T)
+  pat_name = paste(strsplit(pat_files[p],split = "_")[[1]][2:4],collapse = "_")
+  print(paste0("Processing patient: ",pat_name," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks...."))#Sanity check this should be an integer
+  if ((dim(pat)[1]/45)%%1!=0){
+    print("Skipped error in data")
+  }else{
+     for (t in 1:(dim(pat)[1]/45)){
+        sub = pat[((t-1)*45+1):((t-1)*45+45),]
+     } 
+  }
+}
+
+#Aborted trying the other way around first
+```
+
+```{r}
+TAB = NULL
+cond = c("low","med","high")
+treatment = c("Social","NonSocial")
+
+for (p in 1:length(pat_files)){
+  pat = read.table(file=paste0("TrialbyTrial/",pat_files[p]),sep=",",header=T)
+  pat_name = paste(strsplit(pat_files[p],split = "_")[[1]][2:4],collapse = "_")
+  print(paste0("Processing patient: ",pat_name," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks...."))#Sanity check this should be an integer
+  if ((dim(pat)[1]/45)%%1!=0){
+    print("Skipped error in data")
+  }else{
+    for (co in 1:length(cond)){
+      condi = cond[co]
+      for (tr in 1:length(treatment)){
+        treat = treatment[tr]
+        
+        sub = subset(PE_stack,PE_stack[,1]==pat_name & PE_stack[,2]==condi & PE_stack[,3]==treat)
+        
+        if (dim(sub)[1]>0){
+          sub2 = subset(pat,pat$Condition == treat & pat$WinProb == condi)#The order is the same for both table because PE_stack is a child from pat
+          for (i in 1:dim(sub)[1]){
+            block = sub2[((i-1)*45+1):((i-1)*45+45),] #the i^th block
+            PE = as.numeric(sub[i,1:45+4])
+            Patient = rep(pat_name,dim(block)[1])
+            tab = cbind(Patient,block[,2:dim(block)[2]],PE)
+            TAB = rbind(TAB,tab)
+          }
+        }
+      }
+    }  
+  }
+}
+print(paste0("Dimension of the big table: ",dim(TAB)[1]," ",dim(TAB)[2],", this represents ",dim(TAB)[1]/45," trials"))
+
+```
+
+## Correlation anlysis
+
+```{r}
+Patients = levels(as.factor(TAB$Patient))
+abs=T
+for (p in Patients){
+  print(paste("Patient:",p))
+  stab = TAB[TAB$Patient==p,]
+  
+  #Clean the non relevant neurons 
+  tab = stab[,-(which(colSums(stab[,7:(dim(stab)[2]-1)])==0)+6)]
+    
+  #Build the most complete model
+  # predictor_cols <- paste(names(tab)[2:(ncol(tab) - 1)], collapse = " + ")
+  # formula <- as.formula(paste("PE ~", predictor_cols))
+  # 
+  # mod_comp = lm(formula,data=tab) # Be careful you can run this model only if there is at least two treatment, conditions otherwise you cannot apply contrast
+  
+  #Only take into account the spikes
+  predictor_cols <- paste(names(tab)[7:(ncol(tab) - 1)], collapse = " + ")
+  if (abs){
+    formula <- as.formula(paste("abs(PE) ~", predictor_cols))
+    mod = lm(formula,data=tab)
+  }else{
+    formula <- as.formula(paste("PE ~", predictor_cols))
+    mod = lm(formula,data=tab)
+  }
+  
+  print(summary(mod))
+  print("-------------------------------------------------")
+  print("")
+}
+```
+
+## Graphical representation of $PE$
+
+```{r}
+alpha = 0.6
+colours_a = c(rgb(31/255,119/255,180/255,alpha),rgb(255/255,127/255,14/255,alpha),rgb(44/255,160/255,44/255,alpha))
+plot(rep(seq(1,45,1),39),TAB$PE,col=colours_a[ifelse(TAB$WinProb=="low",1,ifelse(TAB$WinProb=="med",2,3))],pch=16,main = "Prediction Error",ylab = "PE",xlab="Trial")
+```
