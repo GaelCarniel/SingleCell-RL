@@ -257,24 +257,6 @@ legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.
 ### Table management:
 
 ```{r}
-
-for (p in 1:length(pat_files)){
-  pat = read.table(file=paste0("TrialbyTrial/",pat_files[p]),sep=",",header=T)
-  pat_name = paste(strsplit(pat_files[p],split = "_")[[1]][2:4],collapse = "_")
-  print(paste0("Processing patient: ",pat_name," did ",dim(pat)[1], " trials which correspond to ",dim(pat)[1]/45," blocks...."))#Sanity check this should be an integer
-  if ((dim(pat)[1]/45)%%1!=0){
-    print("Skipped error in data")
-  }else{
-     for (t in 1:(dim(pat)[1]/45)){
-        sub = pat[((t-1)*45+1):((t-1)*45+45),]
-     } 
-  }
-}
-
-#Aborted trying the other way around first
-```
-
-```{r}
 TAB = NULL
 cond = c("low","med","high")
 treatment = c("Social","NonSocial")
