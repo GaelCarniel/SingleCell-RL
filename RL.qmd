@@ -20,96 +20,6 @@ RL <- function(V, R, alpha = .2){
 }
 ```
 
-````{=html}
-<!-- Je n'ai pas de moteur python sur le PC du boulot je le compilerais de chez moi mais en attendant 
-Prepare python env
-
-```{r}
-library(reticulate)
-```
-
-Import packages required python librairies:
-
-```{python}
-import numpy as np
-import random
-import matplotlib.pyplot as plt
-import pandas as pd
-```
-
-```{python}
-def RL(V, R, alpha = .3):
-  return V+alpha*(R-V);
-```
-
-Let's try to simulate some behavior
-
-```{python}
-p = 0.7; n =100;
-R = np.random.choice([0, 1], size=n, p=[1-p,p]);
-print(sum(R))
-V_init = .5;
-V = np.zeros(len(R));V1 = np.zeros(len(R));V2 = np.zeros(len(R));V3 = np.zeros(len(R));
-v = V_init;v1 = V_init; v2 = V_init; v3 = V_init;
-for i in range(len(R)):
-  v = RL(v,R[i]);
-  v1 = RL(v1,R[i],alpha=.1);
-  v2 = RL(v2,R[i],alpha=.02);
-  v3 = RL(v3,R[i],alpha=.005);
-
-  V[i]=v; V1[i]=v1; V2[i]=v2; V3[i]=v3;
-
-plt.title("Comparison of alphas for a RL model");
-plt.plot(np.arange(0,101),np.concatenate(([V_init], V)),label="Alpha .3");
-plt.plot(np.arange(0,101),np.concatenate(([V_init], V1)),label="Alpha .1");
-plt.plot(np.arange(0,101),np.concatenate(([V_init], V2)),label="Alpha .05");
-plt.plot(np.arange(0,101),np.concatenate(([V_init], V3)),label="Alpha .005");
-plt.axhline(y=p, color='black', linestyle='--');
-
-plt.legend();
-plt.show();
-
-```
-
-Same but with 30 bots averaged
-
-```{python}
-p = 0.7; n =100;
-rep = 30;
-Alphas =[0.2,.1,.02,.005];
-V_init = .5;
-V = np.zeros((len(R),rep));
-V1 = np.zeros((len(R),rep));V2 = np.zeros((len(R),rep));V3 = np.zeros((len(R),rep));
-
-for r in range(rep):
-  R = np.random.choice([0, 1], size=n, p=[1-p,p]);
-  v = V_init;v1 = V_init; v2 = V_init; v3 = V_init;
-  for i in range(len(R)):
-    v = RL(v,R[i],alpha = Alphas[0]);
-    v1 = RL(v1,R[i],alpha = Alphas[1]);
-    v2 = RL(v2,R[i],alpha = Alphas[2]);
-    v3 = RL(v3,R[i],alpha = Alphas[3]);
-    
-    V[i,r]=v;V1[i,r]=v1; V2[i,r]=v2; V3[i,r]=v3;
-
-plt.title("Comparison of alphas for a RL model");
-
-RLs = list([V,V1,V2,V3])
-for i in range(len(Alphas)):
-  Vx = RLs[i]
-  alpha = Alphas[i];
-
-  plt.plot(np.arange(0,101),np.concatenate(([V_init],np.mean(Vx,axis=1))),label=f"Alpha {alpha}");
-  
-plt.axhline(y=p, color='black', linestyle='--');
-plt.legend();
-plt.show();
-
-```
-
--->
-````
-
 ## Real data:
 
 Now I will import data from *pat_02495_0949*:
@@ -172,6 +82,18 @@ cond = levels(as.factor(conditions[1,]))[c(2,3,1)]#To obtain Low Med High
 for (i in 1:length(cond)){
   y = rowMeans(V[,which(conditions[1,]==cond[i])])
   lines(0:45,y ,col = colours[i],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
+```{r}
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL demonstration",ylab = "Oponent Strength",xlab="Trials")
+
+cond = levels(as.factor(conditions[1,]))[c(2,3,1)]#To obtain Low Med High
+for (i in 1:length(cond)){
+  y = rowMeans(V[,which(conditions[1,]==cond[i])])
+  lines(0:45,1-y ,col = colours[i],lwd=3)
 }
 abline(h = seq(.25,.75,.25),col = colours,lty=2)
 legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
@@ -252,6 +174,26 @@ abline(h = seq(.25,.75,.25),col = colours,lty=2)
 legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
 ```
 
+```{r}
+
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL simulation",ylab = "Oponent Strength (averaged)",xlab="Trials")
+
+cond = levels(as.factor(conditions[,1]))[c(2,3,1)]#To obtain Low Med High
+for (i in 1:length(cond)){
+  sub = subset(V_stack[,4:dim(V_stack)[2]],V_stack[,2]==cond[i])
+  #print(paste("Condition:",cond[i],dim(sub)[1],"rows."))
+  
+  #To ensure that everything is numeric
+  sub1 <- as.data.frame(sub)
+  sub1[] <- lapply(sub1, as.numeric)
+  y = colMeans(sub1) 
+  
+  lines(0:45,1-y ,col = colours[i],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
 ## Now let's see if there is a correlation between $PE$ and the number of spikes by trial
 
 ### Table management:
@@ -315,6 +257,7 @@ for (p in Patients){
   predictor_cols <- paste(names(tab)[7:(ncol(tab) - 1)], collapse = " + ")
   if (abs){
     formula <- as.formula(paste("abs(PE) ~", predictor_cols))
+    print(formula)
     mod = lm(formula,data=tab)
   }else{
     formula <- as.formula(paste("PE ~", predictor_cols))
@@ -333,4 +276,59 @@ for (p in Patients){
 alpha = 0.6
 colours_a = c(rgb(31/255,119/255,180/255,alpha),rgb(255/255,127/255,14/255,alpha),rgb(44/255,160/255,44/255,alpha))
 plot(rep(seq(1,45,1),39),TAB$PE,col=colours_a[ifelse(TAB$WinProb=="low",1,ifelse(TAB$WinProb=="med",2,3))],pch=16,main = "Prediction Error",ylab = "PE",xlab="Trial")
+```
+
+```{r}
+
+sub = subset(TAB,TAB$Patient=="pat_02495_0949")
+plot(numeric(0), xlim = c(0, 45), ylim = c(-1, 1), main = "PE for pat_02495_0949",ylab = "Prediction Error",xlab="Trials")
+
+for (i in 1:(dim(sub)[1]/45)){
+  points(1:45,sub[(1+(i-1)*45):(i*45),58],col=colours_a[ifelse(sub$WinProb[(i*45)]=="low",1,ifelse(sub$WinProb[(i*45)]=="med",2,3))],pch=16)
+}
+```
+
+```{r}
+sub = subset(TAB,TAB$Patient=="pat_02495_0949")
+plot(numeric(0), xlim = c(0, 45), ylim = c(-1, 1), main = "PE for pat_02495_0949",ylab = "Prediction Error",xlab="Trials")
+
+for (i in 1:(dim(sub)[1]/45)){
+  points(1:45,sub[(1+(i-1)*45):(i*45),58],col=colours_a[ifelse(sub$WinProb[(i*45)]=="low",1,ifelse(sub$WinProb[(i*45)]=="med",2,3))],pch=16)
+}
+```
+
+```{r}
+Vsub = subset(V_stack,V_stack$V1=="pat_02495_0949")
+
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "V for pat_02495_0949",ylab = "Prediction Error",xlab="Trials")
+
+for (i in 1:(dim(sub)[1]/45)){
+  lines(0:45,Vsub[i,4:49],col=colours[(i+1)%/%2],pch=16,lwd=2)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
+```{r}
+zeros = which(TAB$Post_spikes42==0)
+plot(abs(TAB$PE[-zeros])~TAB$Post_spikes42[-zeros],xlab="Spikes post trial",ylab="Prediction Error",main="Neuron 42",pch=16,col = rgb(2,22,69,150,maxColorValue = 255))
+
+mod = lm(abs(TAB$PE[-zeros])~TAB$Post_spikes42[-zeros])
+abline(mod,lwd=2,col='red')
+```
+
+```{r}
+zeros = which(TAB$Post_spikes47==0)
+plot(abs(TAB$PE[-zeros])~TAB$Post_spikes42[-zeros],xlab="Spikes post trial",ylab="Prediction Error",main="Neuron 47",pch=16,col = rgb(2,22,69,150,maxColorValue = 255))
+
+mod = lm(abs(TAB$PE[-zeros])~TAB$Post_spikes47[-zeros])
+abline(mod,lwd=2,col='red')
+```
+
+```{r}
+zeros = which(TAB$Post_spikes11==0)
+plot(abs(TAB$PE[-zeros])~TAB$Post_spikes11[-zeros],xlab="Spikes post trial",ylab="Prediction Error",main="Neuron 11",pch=16,col = rgb(2,22,69,150,maxColorValue = 255))
+
+mod = lm(abs(TAB$PE[-zeros])~TAB$Post_spikes11[-zeros])
+abline(mod,lwd=2,col='red')
 ```

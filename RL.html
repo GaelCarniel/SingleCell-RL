@@ -137,7 +137,6 @@ window.Quarto = {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> (V<span class="sc">+</span>alpha<span class="sc">*</span>(R<span class="sc">-</span>V))</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-
 </section>
 <section id="real-data" class="level2">
 <h2 class="anchored" data-anchor-id="real-data">Real data:</h2>
@@ -213,54 +212,72 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"RL demonstration"</span>,<span class="at">ylab =</span> <span class="st">"Oponent Strength"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(conditions[<span class="dv">1</span>,]))[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>)]<span class="co">#To obtain Low Med High</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> <span class="fu">rowMeans</span>(V[,<span class="fu">which</span>(conditions[<span class="dv">1</span>,]<span class="sc">==</span>cond[i])])</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">45</span>,<span class="dv">1</span><span class="sc">-</span>y ,<span class="at">col =</span> colours[i],<span class="at">lwd=</span><span class="dv">3</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">seq</span>(.<span class="dv">25</span>,.<span class="dv">75</span>,.<span class="dv">25</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Low"</span>,<span class="st">"Med"</span>,<span class="st">"High"</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">cex=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="for-every-participant" class="level2">
 <h2 class="anchored" data-anchor-id="for-every-participant">For every participant</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pat_files <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path=</span><span class="st">"TrialbyTrial/"</span>,<span class="at">pattern=</span><span class="st">"PostSpikes"</span>)<span class="co">#Files of all participants only for the activation pôst stim</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>V_stack <span class="ot">=</span> <span class="cn">NULL</span>;PE_stack <span class="ot">=</span> <span class="cn">NULL</span>;</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(pat_files)){</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Read data</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  pat <span class="ot">=</span> <span class="fu">read.table</span>(<span class="at">file=</span><span class="fu">paste0</span>(<span class="st">"TrialbyTrial/"</span>,pat_files[p]),<span class="at">sep=</span><span class="st">","</span>,<span class="at">header=</span>T)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  pat_name <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">strsplit</span>(pat_files[p],<span class="at">split =</span> <span class="st">"_"</span>)[[<span class="dv">1</span>]][<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">collapse =</span> <span class="st">"_"</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Processing patient: "</span>,pat_name,<span class="st">" did "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>], <span class="st">" trials which correspond to "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" blocks...."</span>))<span class="co">#Sanity check this should be an integer</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ((<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)<span class="sc">%%</span><span class="dv">1</span><span class="sc">!=</span><span class="dv">0</span>){</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Skipped error in data"</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    pat<span class="sc">$</span>Trial <span class="ot">=</span> <span class="fu">ifelse</span>(pat<span class="sc">$</span>Trial<span class="sc">&gt;</span><span class="dv">45</span>,pat<span class="sc">$</span>Trial<span class="dv">-45</span>,pat<span class="sc">$</span>Trial) <span class="co">#Correction of data collection </span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Simulation RL </span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    V_init <span class="ot">=</span> <span class="fl">0.5</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">45</span>)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    PE <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">45</span>)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    conditions <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">2</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>      v <span class="ot">=</span> V_init</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>      sub <span class="ot">=</span> pat[((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">45</span>),]</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      R <span class="ot">=</span> sub<span class="sc">$</span>WinLose</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">45</span>){</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">=</span> <span class="fu">RL</span>(v,R[t],<span class="fl">0.2</span>)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        PE[i,t] <span class="ot">=</span> R[t]<span class="sc">-</span>v</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        V[i,t] <span class="ot">=</span> v</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>      <span class="co">#Here it should be only one everytime but as sanity check I'll put unique() (it will bug if there is more than one item)</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>      conditions[i,<span class="dv">1</span>] <span class="ot">=</span> <span class="fu">unique</span>(sub<span class="sc">$</span>WinProb)</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>      conditions[i,<span class="dv">2</span>] <span class="ot">=</span> <span class="fu">unique</span>(sub<span class="sc">$</span>Condition)</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(conditions)[<span class="dv">1</span>]),conditions,<span class="fu">rep</span>(V_init,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>),V)</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    PE <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(conditions)[<span class="dv">1</span>]),conditions,<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>),PE)</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    V_stack <span class="ot">=</span> <span class="fu">rbind</span>(V_stack,V)</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    PE_stack <span class="ot">=</span> <span class="fu">rbind</span>(PE_stack,PE)</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pat_files <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path=</span><span class="st">"TrialbyTrial/"</span>,<span class="at">pattern=</span><span class="st">"PostSpikes"</span>)<span class="co">#Files of all participants only for the activation pôst stim</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>V_stack <span class="ot">=</span> <span class="cn">NULL</span>;PE_stack <span class="ot">=</span> <span class="cn">NULL</span>;</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(pat_files)){</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Read data</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  pat <span class="ot">=</span> <span class="fu">read.table</span>(<span class="at">file=</span><span class="fu">paste0</span>(<span class="st">"TrialbyTrial/"</span>,pat_files[p]),<span class="at">sep=</span><span class="st">","</span>,<span class="at">header=</span>T)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  pat_name <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">strsplit</span>(pat_files[p],<span class="at">split =</span> <span class="st">"_"</span>)[[<span class="dv">1</span>]][<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">collapse =</span> <span class="st">"_"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Processing patient: "</span>,pat_name,<span class="st">" did "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>], <span class="st">" trials which correspond to "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" blocks...."</span>))<span class="co">#Sanity check this should be an integer</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ((<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)<span class="sc">%%</span><span class="dv">1</span><span class="sc">!=</span><span class="dv">0</span>){</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Skipped error in data"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    pat<span class="sc">$</span>Trial <span class="ot">=</span> <span class="fu">ifelse</span>(pat<span class="sc">$</span>Trial<span class="sc">&gt;</span><span class="dv">45</span>,pat<span class="sc">$</span>Trial<span class="dv">-45</span>,pat<span class="sc">$</span>Trial) <span class="co">#Correction of data collection </span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Simulation RL </span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    V_init <span class="ot">=</span> <span class="fl">0.5</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">45</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    PE <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">45</span>)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    conditions <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="dv">2</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>      v <span class="ot">=</span> V_init</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>      sub <span class="ot">=</span> pat[((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">45</span>),]</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>      R <span class="ot">=</span> sub<span class="sc">$</span>WinLose</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">45</span>){</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">=</span> <span class="fu">RL</span>(v,R[t],<span class="fl">0.2</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        PE[i,t] <span class="ot">=</span> R[t]<span class="sc">-</span>v</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        V[i,t] <span class="ot">=</span> v</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>      <span class="co">#Here it should be only one everytime but as sanity check I'll put unique() (it will bug if there is more than one item)</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>      conditions[i,<span class="dv">1</span>] <span class="ot">=</span> <span class="fu">unique</span>(sub<span class="sc">$</span>WinProb)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>      conditions[i,<span class="dv">2</span>] <span class="ot">=</span> <span class="fu">unique</span>(sub<span class="sc">$</span>Condition)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(conditions)[<span class="dv">1</span>]),conditions,<span class="fu">rep</span>(V_init,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>),V)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    PE <span class="ot">=</span> <span class="fu">cbind</span>(<span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(conditions)[<span class="dv">1</span>]),conditions,<span class="fu">rep</span>(<span class="cn">NA</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>),PE)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    V_stack <span class="ot">=</span> <span class="fu">rbind</span>(V_stack,V)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    PE_stack <span class="ot">=</span> <span class="fu">rbind</span>(PE_stack,PE)</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Processing patient: pat_02495_0949 did 270 trials which correspond to 6 blocks...."
 [1] "Processing patient: pat_02578_1036 did 270 trials which correspond to 6 blocks...."
@@ -272,29 +289,54 @@ window.Quarto = {
 [1] "Processing patient: pat_03138_1601 did 405 trials which correspond to 9 blocks...."
 [1] "Processing patient: pat_03146_1608 did 405 trials which correspond to 9 blocks...."</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>V_stack <span class="ot">=</span> <span class="fu">as.data.frame</span>(V_stack)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>V_stack <span class="ot">=</span> <span class="fu">as.data.frame</span>(V_stack)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"RL simulation"</span>,<span class="at">ylab =</span> <span class="st">"Oponent Value (averaged)"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(conditions[,<span class="dv">1</span>]))[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>)]<span class="co">#To obtain Low Med High</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  sub <span class="ot">=</span> <span class="fu">subset</span>(V_stack[,<span class="dv">4</span><span class="sc">:</span><span class="fu">dim</span>(V_stack)[<span class="dv">2</span>]],V_stack[,<span class="dv">2</span>]<span class="sc">==</span>cond[i])</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#print(paste("Condition:",cond[i],dim(sub)[1],"rows."))</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#To ensure that everything is numeric</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  sub1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sub)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  sub1[] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(sub1, as.numeric)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> <span class="fu">colMeans</span>(sub1) </span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">45</span>,y ,<span class="at">col =</span> colours[i],<span class="at">lwd=</span><span class="dv">3</span>)</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">seq</span>(.<span class="dv">25</span>,.<span class="dv">75</span>,.<span class="dv">25</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">2</span>)</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Low"</span>,<span class="st">"Med"</span>,<span class="st">"High"</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">cex=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"RL simulation"</span>,<span class="at">ylab =</span> <span class="st">"Oponent Value (averaged)"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(conditions[,<span class="dv">1</span>]))[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>)]<span class="co">#To obtain Low Med High</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  sub <span class="ot">=</span> <span class="fu">subset</span>(V_stack[,<span class="dv">4</span><span class="sc">:</span><span class="fu">dim</span>(V_stack)[<span class="dv">2</span>]],V_stack[,<span class="dv">2</span>]<span class="sc">==</span>cond[i])</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#print(paste("Condition:",cond[i],dim(sub)[1],"rows."))</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#To ensure that everything is numeric</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  sub1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sub)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  sub1[] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(sub1, as.numeric)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> <span class="fu">colMeans</span>(sub1) </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">45</span>,y ,<span class="at">col =</span> colours[i],<span class="at">lwd=</span><span class="dv">3</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">seq</span>(.<span class="dv">25</span>,.<span class="dv">75</span>,.<span class="dv">25</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Low"</span>,<span class="st">"Med"</span>,<span class="st">"High"</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">cex=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="RL_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="RL_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"RL simulation"</span>,<span class="at">ylab =</span> <span class="st">"Oponent Strength (averaged)"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(conditions[,<span class="dv">1</span>]))[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>)]<span class="co">#To obtain Low Med High</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  sub <span class="ot">=</span> <span class="fu">subset</span>(V_stack[,<span class="dv">4</span><span class="sc">:</span><span class="fu">dim</span>(V_stack)[<span class="dv">2</span>]],V_stack[,<span class="dv">2</span>]<span class="sc">==</span>cond[i])</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#print(paste("Condition:",cond[i],dim(sub)[1],"rows."))</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#To ensure that everything is numeric</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  sub1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(sub)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  sub1[] <span class="ot">&lt;-</span> <span class="fu">lapply</span>(sub1, as.numeric)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> <span class="fu">colMeans</span>(sub1) </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">45</span>,<span class="dv">1</span><span class="sc">-</span>y ,<span class="at">col =</span> colours[i],<span class="at">lwd=</span><span class="dv">3</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">seq</span>(.<span class="dv">25</span>,.<span class="dv">75</span>,.<span class="dv">25</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Low"</span>,<span class="st">"Med"</span>,<span class="st">"High"</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">cex=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -305,18 +347,38 @@ window.Quarto = {
 <section id="table-management" class="level3">
 <h3 class="anchored" data-anchor-id="table-management">Table management:</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(pat_files)){</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  pat <span class="ot">=</span> <span class="fu">read.table</span>(<span class="at">file=</span><span class="fu">paste0</span>(<span class="st">"TrialbyTrial/"</span>,pat_files[p]),<span class="at">sep=</span><span class="st">","</span>,<span class="at">header=</span>T)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  pat_name <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">strsplit</span>(pat_files[p],<span class="at">split =</span> <span class="st">"_"</span>)[[<span class="dv">1</span>]][<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">collapse =</span> <span class="st">"_"</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Processing patient: "</span>,pat_name,<span class="st">" did "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>], <span class="st">" trials which correspond to "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" blocks...."</span>))<span class="co">#Sanity check this should be an integer</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ((<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)<span class="sc">%%</span><span class="dv">1</span><span class="sc">!=</span><span class="dv">0</span>){</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Skipped error in data"</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>     <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        sub <span class="ot">=</span> pat[((t<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>((t<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">45</span>),]</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>     } </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>TAB <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"med"</span>,<span class="st">"high"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Social"</span>,<span class="st">"NonSocial"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(pat_files)){</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  pat <span class="ot">=</span> <span class="fu">read.table</span>(<span class="at">file=</span><span class="fu">paste0</span>(<span class="st">"TrialbyTrial/"</span>,pat_files[p]),<span class="at">sep=</span><span class="st">","</span>,<span class="at">header=</span>T)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  pat_name <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">strsplit</span>(pat_files[p],<span class="at">split =</span> <span class="st">"_"</span>)[[<span class="dv">1</span>]][<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">collapse =</span> <span class="st">"_"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Processing patient: "</span>,pat_name,<span class="st">" did "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>], <span class="st">" trials which correspond to "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" blocks...."</span>))<span class="co">#Sanity check this should be an integer</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ((<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)<span class="sc">%%</span><span class="dv">1</span><span class="sc">!=</span><span class="dv">0</span>){</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Skipped error in data"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (co <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      condi <span class="ot">=</span> cond[co]</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (tr <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(treatment)){</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        treat <span class="ot">=</span> treatment[tr]</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        sub <span class="ot">=</span> <span class="fu">subset</span>(PE_stack,PE_stack[,<span class="dv">1</span>]<span class="sc">==</span>pat_name <span class="sc">&amp;</span> PE_stack[,<span class="dv">2</span>]<span class="sc">==</span>condi <span class="sc">&amp;</span> PE_stack[,<span class="dv">3</span>]<span class="sc">==</span>treat)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">dim</span>(sub)[<span class="dv">1</span>]<span class="sc">&gt;</span><span class="dv">0</span>){</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>          sub2 <span class="ot">=</span> <span class="fu">subset</span>(pat,pat<span class="sc">$</span>Condition <span class="sc">==</span> treat <span class="sc">&amp;</span> pat<span class="sc">$</span>WinProb <span class="sc">==</span> condi)<span class="co">#The order is the same for both table because PE_stack is a child from pat</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">dim</span>(sub)[<span class="dv">1</span>]){</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>            block <span class="ot">=</span> sub2[((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">45</span>),] <span class="co">#the i^th block</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>            PE <span class="ot">=</span> <span class="fu">as.numeric</span>(sub[i,<span class="dv">1</span><span class="sc">:</span><span class="dv">45</span><span class="sc">+</span><span class="dv">4</span>])</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>            Patient <span class="ot">=</span> <span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(block)[<span class="dv">1</span>])</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>            tab <span class="ot">=</span> <span class="fu">cbind</span>(Patient,block[,<span class="dv">2</span><span class="sc">:</span><span class="fu">dim</span>(block)[<span class="dv">2</span>]],PE)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>            TAB <span class="ot">=</span> <span class="fu">rbind</span>(TAB,tab)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    }  </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Processing patient: pat_02495_0949 did 270 trials which correspond to 6 blocks...."
 [1] "Processing patient: pat_02578_1036 did 270 trials which correspond to 6 blocks...."
@@ -328,53 +390,7 @@ window.Quarto = {
 [1] "Processing patient: pat_03138_1601 did 405 trials which correspond to 9 blocks...."
 [1] "Processing patient: pat_03146_1608 did 405 trials which correspond to 9 blocks...."</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Aborted trying the other way around first</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>TAB <span class="ot">=</span> <span class="cn">NULL</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"low"</span>,<span class="st">"med"</span>,<span class="st">"high"</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Social"</span>,<span class="st">"NonSocial"</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(pat_files)){</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  pat <span class="ot">=</span> <span class="fu">read.table</span>(<span class="at">file=</span><span class="fu">paste0</span>(<span class="st">"TrialbyTrial/"</span>,pat_files[p]),<span class="at">sep=</span><span class="st">","</span>,<span class="at">header=</span>T)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  pat_name <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">strsplit</span>(pat_files[p],<span class="at">split =</span> <span class="st">"_"</span>)[[<span class="dv">1</span>]][<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],<span class="at">collapse =</span> <span class="st">"_"</span>)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Processing patient: "</span>,pat_name,<span class="st">" did "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>], <span class="st">" trials which correspond to "</span>,<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" blocks...."</span>))<span class="co">#Sanity check this should be an integer</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ((<span class="fu">dim</span>(pat)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)<span class="sc">%%</span><span class="dv">1</span><span class="sc">!=</span><span class="dv">0</span>){</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Skipped error in data"</span>)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (co <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cond)){</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      condi <span class="ot">=</span> cond[co]</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (tr <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(treatment)){</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        treat <span class="ot">=</span> treatment[tr]</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        sub <span class="ot">=</span> <span class="fu">subset</span>(PE_stack,PE_stack[,<span class="dv">1</span>]<span class="sc">==</span>pat_name <span class="sc">&amp;</span> PE_stack[,<span class="dv">2</span>]<span class="sc">==</span>condi <span class="sc">&amp;</span> PE_stack[,<span class="dv">3</span>]<span class="sc">==</span>treat)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">dim</span>(sub)[<span class="dv">1</span>]<span class="sc">&gt;</span><span class="dv">0</span>){</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>          sub2 <span class="ot">=</span> <span class="fu">subset</span>(pat,pat<span class="sc">$</span>Condition <span class="sc">==</span> treat <span class="sc">&amp;</span> pat<span class="sc">$</span>WinProb <span class="sc">==</span> condi)<span class="co">#The order is the same for both table because PE_stack is a child from pat</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">dim</span>(sub)[<span class="dv">1</span>]){</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>            block <span class="ot">=</span> sub2[((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>((i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span><span class="sc">+</span><span class="dv">45</span>),] <span class="co">#the i^th block</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>            PE <span class="ot">=</span> <span class="fu">as.numeric</span>(sub[i,<span class="dv">1</span><span class="sc">:</span><span class="dv">45</span><span class="sc">+</span><span class="dv">4</span>])</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>            Patient <span class="ot">=</span> <span class="fu">rep</span>(pat_name,<span class="fu">dim</span>(block)[<span class="dv">1</span>])</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>            tab <span class="ot">=</span> <span class="fu">cbind</span>(Patient,block[,<span class="dv">2</span><span class="sc">:</span><span class="fu">dim</span>(block)[<span class="dv">2</span>]],PE)</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>            TAB <span class="ot">=</span> <span class="fu">rbind</span>(TAB,tab)</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    }  </span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Processing patient: pat_02495_0949 did 270 trials which correspond to 6 blocks...."
-[1] "Processing patient: pat_02578_1036 did 270 trials which correspond to 6 blocks...."
-[1] "Processing patient: pat_02680_1158 did 405 trials which correspond to 9 blocks...."
-[1] "Processing patient: pat_03092_1538 did 403 trials which correspond to 8.95555555555556 blocks...."
-[1] "Skipped error in data"
-[1] "Processing patient: pat_03128_1591 did 404 trials which correspond to 8.97777777777778 blocks...."
-[1] "Skipped error in data"
-[1] "Processing patient: pat_03138_1601 did 405 trials which correspond to 9 blocks...."
-[1] "Processing patient: pat_03146_1608 did 405 trials which correspond to 9 blocks...."</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Dimension of the big table: "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">1</span>],<span class="st">" "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">2</span>],<span class="st">", this represents "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" trials"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"Dimension of the big table: "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">1</span>],<span class="st">" "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">2</span>],<span class="st">", this represents "</span>,<span class="fu">dim</span>(TAB)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>,<span class="st">" trials"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Dimension of the big table: 1755 58, this represents 39 trials"</code></pre>
 </div>
@@ -384,37 +400,40 @@ window.Quarto = {
 <section id="correlation-anlysis" class="level2">
 <h2 class="anchored" data-anchor-id="correlation-anlysis">Correlation anlysis</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Patients <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(TAB<span class="sc">$</span>Patient))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>abs<span class="ot">=</span>T</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> Patients){</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Patient:"</span>,p))</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  stab <span class="ot">=</span> TAB[TAB<span class="sc">$</span>Patient<span class="sc">==</span>p,]</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Clean the non relevant neurons </span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  tab <span class="ot">=</span> stab[,<span class="sc">-</span>(<span class="fu">which</span>(<span class="fu">colSums</span>(stab[,<span class="dv">7</span><span class="sc">:</span>(<span class="fu">dim</span>(stab)[<span class="dv">2</span>]<span class="sc">-</span><span class="dv">1</span>)])<span class="sc">==</span><span class="dv">0</span>)<span class="sc">+</span><span class="dv">6</span>)]</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Build the most complete model</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># predictor_cols &lt;- paste(names(tab)[2:(ncol(tab) - 1)], collapse = " + ")</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># formula &lt;- as.formula(paste("PE ~", predictor_cols))</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># </span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mod_comp = lm(formula,data=tab) # Be careful you can run this model only if there is at least two treatment, conditions otherwise you cannot apply contrast</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Only take into account the spikes</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  predictor_cols <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">names</span>(tab)[<span class="dv">7</span><span class="sc">:</span>(<span class="fu">ncol</span>(tab) <span class="sc">-</span> <span class="dv">1</span>)], <span class="at">collapse =</span> <span class="st">" + "</span>)</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (abs){</span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"abs(PE) ~"</span>, predictor_cols))</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">=</span> <span class="fu">lm</span>(formula,<span class="at">data=</span>tab)</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"PE ~"</span>, predictor_cols))</span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">=</span> <span class="fu">lm</span>(formula,<span class="at">data=</span>tab)</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">summary</span>(mod))</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">"-------------------------------------------------"</span>)</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">""</span>)</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Patients <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">as.factor</span>(TAB<span class="sc">$</span>Patient))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>abs<span class="ot">=</span>T</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> Patients){</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Patient:"</span>,p))</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  stab <span class="ot">=</span> TAB[TAB<span class="sc">$</span>Patient<span class="sc">==</span>p,]</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Clean the non relevant neurons </span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  tab <span class="ot">=</span> stab[,<span class="sc">-</span>(<span class="fu">which</span>(<span class="fu">colSums</span>(stab[,<span class="dv">7</span><span class="sc">:</span>(<span class="fu">dim</span>(stab)[<span class="dv">2</span>]<span class="sc">-</span><span class="dv">1</span>)])<span class="sc">==</span><span class="dv">0</span>)<span class="sc">+</span><span class="dv">6</span>)]</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Build the most complete model</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># predictor_cols &lt;- paste(names(tab)[2:(ncol(tab) - 1)], collapse = " + ")</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># formula &lt;- as.formula(paste("PE ~", predictor_cols))</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># </span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mod_comp = lm(formula,data=tab) # Be careful you can run this model only if there is at least two treatment, conditions otherwise you cannot apply contrast</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Only take into account the spikes</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  predictor_cols <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">names</span>(tab)[<span class="dv">7</span><span class="sc">:</span>(<span class="fu">ncol</span>(tab) <span class="sc">-</span> <span class="dv">1</span>)], <span class="at">collapse =</span> <span class="st">" + "</span>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (abs){</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"abs(PE) ~"</span>, predictor_cols))</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(formula)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">=</span> <span class="fu">lm</span>(formula,<span class="at">data=</span>tab)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">as.formula</span>(<span class="fu">paste</span>(<span class="st">"PE ~"</span>, predictor_cols))</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">=</span> <span class="fu">lm</span>(formula,<span class="at">data=</span>tab)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">summary</span>(mod))</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">"-------------------------------------------------"</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">""</span>)</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Patient: pat_02495_0949"
+abs(PE) ~ Post_spikes1 + Post_spikes2 + Post_spikes3 + Post_spikes4 + 
+    Post_spikes5 + Post_spikes6 + Post_spikes7
 
 Call:
 lm(formula = formula, data = tab)
@@ -443,6 +462,7 @@ F-statistic: 1.401 on 6 and 263 DF,  p-value: 0.2146
 [1] "-------------------------------------------------"
 [1] ""
 [1] "Patient: pat_02578_1036"
+abs(PE) ~ Post_spikes8 + Post_spikes9 + Post_spikes10
 
 Call:
 lm(formula = formula, data = tab)
@@ -467,6 +487,7 @@ F-statistic: 0.2042 on 3 and 266 DF,  p-value: 0.8934
 [1] "-------------------------------------------------"
 [1] ""
 [1] "Patient: pat_02680_1158"
+abs(PE) ~ Post_spikes11 + Post_spikes12 + Post_spikes13
 
 Call:
 lm(formula = formula, data = tab)
@@ -491,6 +512,8 @@ F-statistic:  2.38 on 3 and 401 DF,  p-value: 0.06918
 [1] "-------------------------------------------------"
 [1] ""
 [1] "Patient: pat_03138_1601"
+abs(PE) ~ Post_spikes36 + Post_spikes37 + Post_spikes38 + Post_spikes39 + 
+    Post_spikes40
 
 Call:
 lm(formula = formula, data = tab)
@@ -517,6 +540,9 @@ F-statistic: 1.321 on 5 and 399 DF,  p-value: 0.2543
 [1] "-------------------------------------------------"
 [1] ""
 [1] "Patient: pat_03146_1608"
+abs(PE) ~ Post_spikes41 + Post_spikes42 + Post_spikes43 + Post_spikes44 + 
+    Post_spikes45 + Post_spikes46 + Post_spikes47 + Post_spikes48 + 
+    Post_spikes49 + Post_spikes50 + Post_spikes51
 
 Call:
 lm(formula = formula, data = tab)
@@ -554,13 +580,103 @@ F-statistic: 5.353 on 11 and 393 DF,  p-value: 6.312e-08
 <section id="graphical-representation-of-pe" class="level2">
 <h2 class="anchored" data-anchor-id="graphical-representation-of-pe">Graphical representation of <span class="math inline">\(PE\)</span></h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">=</span> <span class="fl">0.6</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>colours_a <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="dv">31</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">119</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">180</span><span class="sc">/</span><span class="dv">255</span>,alpha),<span class="fu">rgb</span>(<span class="dv">255</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">127</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">14</span><span class="sc">/</span><span class="dv">255</span>,alpha),<span class="fu">rgb</span>(<span class="dv">44</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">160</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">44</span><span class="sc">/</span><span class="dv">255</span>,alpha))</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">rep</span>(<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">45</span>,<span class="dv">1</span>),<span class="dv">39</span>),TAB<span class="sc">$</span>PE,<span class="at">col=</span>colours_a[<span class="fu">ifelse</span>(TAB<span class="sc">$</span>WinProb<span class="sc">==</span><span class="st">"low"</span>,<span class="dv">1</span>,<span class="fu">ifelse</span>(TAB<span class="sc">$</span>WinProb<span class="sc">==</span><span class="st">"med"</span>,<span class="dv">2</span>,<span class="dv">3</span>))],<span class="at">pch=</span><span class="dv">16</span>,<span class="at">main =</span> <span class="st">"Prediction Error"</span>,<span class="at">ylab =</span> <span class="st">"PE"</span>,<span class="at">xlab=</span><span class="st">"Trial"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">=</span> <span class="fl">0.6</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>colours_a <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="dv">31</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">119</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">180</span><span class="sc">/</span><span class="dv">255</span>,alpha),<span class="fu">rgb</span>(<span class="dv">255</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">127</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">14</span><span class="sc">/</span><span class="dv">255</span>,alpha),<span class="fu">rgb</span>(<span class="dv">44</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">160</span><span class="sc">/</span><span class="dv">255</span>,<span class="dv">44</span><span class="sc">/</span><span class="dv">255</span>,alpha))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">rep</span>(<span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">45</span>,<span class="dv">1</span>),<span class="dv">39</span>),TAB<span class="sc">$</span>PE,<span class="at">col=</span>colours_a[<span class="fu">ifelse</span>(TAB<span class="sc">$</span>WinProb<span class="sc">==</span><span class="st">"low"</span>,<span class="dv">1</span>,<span class="fu">ifelse</span>(TAB<span class="sc">$</span>WinProb<span class="sc">==</span><span class="st">"med"</span>,<span class="dv">2</span>,<span class="dv">3</span>))],<span class="at">pch=</span><span class="dv">16</span>,<span class="at">main =</span> <span class="st">"Prediction Error"</span>,<span class="at">ylab =</span> <span class="st">"PE"</span>,<span class="at">xlab=</span><span class="st">"Trial"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="RL_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="RL_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">=</span> <span class="fu">subset</span>(TAB,TAB<span class="sc">$</span>Patient<span class="sc">==</span><span class="st">"pat_02495_0949"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"PE for pat_02495_0949"</span>,<span class="at">ylab =</span> <span class="st">"Prediction Error"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(sub)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">45</span>,sub[(<span class="dv">1</span><span class="sc">+</span>(i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span>)<span class="sc">:</span>(i<span class="sc">*</span><span class="dv">45</span>),<span class="dv">58</span>],<span class="at">col=</span>colours_a[<span class="fu">ifelse</span>(sub<span class="sc">$</span>WinProb[(i<span class="sc">*</span><span class="dv">45</span>)]<span class="sc">==</span><span class="st">"low"</span>,<span class="dv">1</span>,<span class="fu">ifelse</span>(sub<span class="sc">$</span>WinProb[(i<span class="sc">*</span><span class="dv">45</span>)]<span class="sc">==</span><span class="st">"med"</span>,<span class="dv">2</span>,<span class="dv">3</span>))],<span class="at">pch=</span><span class="dv">16</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>sub <span class="ot">=</span> <span class="fu">subset</span>(TAB,TAB<span class="sc">$</span>Patient<span class="sc">==</span><span class="st">"pat_02495_0949"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"PE for pat_02495_0949"</span>,<span class="at">ylab =</span> <span class="st">"Prediction Error"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(sub)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">45</span>,sub[(<span class="dv">1</span><span class="sc">+</span>(i<span class="dv">-1</span>)<span class="sc">*</span><span class="dv">45</span>)<span class="sc">:</span>(i<span class="sc">*</span><span class="dv">45</span>),<span class="dv">58</span>],<span class="at">col=</span>colours_a[<span class="fu">ifelse</span>(sub<span class="sc">$</span>WinProb[(i<span class="sc">*</span><span class="dv">45</span>)]<span class="sc">==</span><span class="st">"low"</span>,<span class="dv">1</span>,<span class="fu">ifelse</span>(sub<span class="sc">$</span>WinProb[(i<span class="sc">*</span><span class="dv">45</span>)]<span class="sc">==</span><span class="st">"med"</span>,<span class="dv">2</span>,<span class="dv">3</span>))],<span class="at">pch=</span><span class="dv">16</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Vsub <span class="ot">=</span> <span class="fu">subset</span>(V_stack,V_stack<span class="sc">$</span>V1<span class="sc">==</span><span class="st">"pat_02495_0949"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">numeric</span>(<span class="dv">0</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">45</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">main =</span> <span class="st">"V for pat_02495_0949"</span>,<span class="at">ylab =</span> <span class="st">"Prediction Error"</span>,<span class="at">xlab=</span><span class="st">"Trials"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(sub)[<span class="dv">1</span>]<span class="sc">/</span><span class="dv">45</span>)){</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">45</span>,Vsub[i,<span class="dv">4</span><span class="sc">:</span><span class="dv">49</span>],<span class="at">col=</span>colours[(i<span class="sc">+</span><span class="dv">1</span>)<span class="sc">%/%</span><span class="dv">2</span>],<span class="at">pch=</span><span class="dv">16</span>,<span class="at">lwd=</span><span class="dv">2</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">seq</span>(.<span class="dv">25</span>,.<span class="dv">75</span>,.<span class="dv">25</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,<span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Low"</span>,<span class="st">"Med"</span>,<span class="st">"High"</span>),<span class="at">col =</span> colours,<span class="at">lty=</span><span class="dv">1</span>,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">cex=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>zeros <span class="ot">=</span> <span class="fu">which</span>(TAB<span class="sc">$</span>Post_spikes42<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes42[<span class="sc">-</span>zeros],<span class="at">xlab=</span><span class="st">"Spikes post trial"</span>,<span class="at">ylab=</span><span class="st">"Prediction Error"</span>,<span class="at">main=</span><span class="st">"Neuron 42"</span>,<span class="at">pch=</span><span class="dv">16</span>,<span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">2</span>,<span class="dv">22</span>,<span class="dv">69</span>,<span class="dv">150</span>,<span class="at">maxColorValue =</span> <span class="dv">255</span>))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">=</span> <span class="fu">lm</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes42[<span class="sc">-</span>zeros])</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>zeros <span class="ot">=</span> <span class="fu">which</span>(TAB<span class="sc">$</span>Post_spikes47<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes42[<span class="sc">-</span>zeros],<span class="at">xlab=</span><span class="st">"Spikes post trial"</span>,<span class="at">ylab=</span><span class="st">"Prediction Error"</span>,<span class="at">main=</span><span class="st">"Neuron 47"</span>,<span class="at">pch=</span><span class="dv">16</span>,<span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">2</span>,<span class="dv">22</span>,<span class="dv">69</span>,<span class="dv">150</span>,<span class="at">maxColorValue =</span> <span class="dv">255</span>))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">=</span> <span class="fu">lm</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes47[<span class="sc">-</span>zeros])</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>zeros <span class="ot">=</span> <span class="fu">which</span>(TAB<span class="sc">$</span>Post_spikes11<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes11[<span class="sc">-</span>zeros],<span class="at">xlab=</span><span class="st">"Spikes post trial"</span>,<span class="at">ylab=</span><span class="st">"Prediction Error"</span>,<span class="at">main=</span><span class="st">"Neuron 11"</span>,<span class="at">pch=</span><span class="dv">16</span>,<span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">2</span>,<span class="dv">22</span>,<span class="dv">69</span>,<span class="dv">150</span>,<span class="at">maxColorValue =</span> <span class="dv">255</span>))</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">=</span> <span class="fu">lm</span>(<span class="fu">abs</span>(TAB<span class="sc">$</span>PE[<span class="sc">-</span>zeros])<span class="sc">~</span>TAB<span class="sc">$</span>Post_spikes11[<span class="sc">-</span>zeros])</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod,<span class="at">lwd=</span><span class="dv">2</span>,<span class="at">col=</span><span class="st">'red'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="RL_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
