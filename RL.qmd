@@ -332,3 +332,47 @@ plot(abs(TAB$PE[-zeros])~TAB$Post_spikes11[-zeros],xlab="Spikes post trial",ylab
 mod = lm(abs(TAB$PE[-zeros])~TAB$Post_spikes11[-zeros])
 abline(mod,lwd=2,col='red')
 ```
+
+## Adding ratings of participants
+
+```{r}
+ratings = read.csv("Ratings.csv", header=T)
+
+
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL simulation",ylab = "Oponent Strenght (averaged)",xlab="Trials")
+  
+cond = levels(as.factor(conditions[,1]))[c(2,3,1)]#To obtain Low Med High
+cond_float = seq(0.25,0.75,0.25)
+for (i in 1:length(cond)){
+  sub = subset(V_stack[,4:dim(V_stack)[2]],V_stack[,2]==cond[i])
+  #print(paste("Condition:",cond[i],dim(sub)[1],"rows."))
+  
+  #To ensure that everything is numeric
+  sub1 <- as.data.frame(sub)
+  sub1[] <- lapply(sub1, as.numeric)
+  y = colMeans(sub1) 
+  
+  se = rep(NA,dim(sub1)[2])
+  for (k in 1:dim(sub1)[2]){
+    se[k] = sd(sub1[,k])/sqrt(dim(sub1)[1])
+  }
+  polygon(c(0:45,45:0),c((1-y)+se,rev((1-y)-se)),col = colours_a[i],border = NA)
+  
+  lines(0:45,1-y ,col = colours[i],lwd=3)
+  
+  subratings = subset(ratings,ratings$Win_Prob==cond_float[i])
+  xs = c(0,5,20,45)
+  rates = rep(NA,4);se_rates = rep(NA,4)
+  for (j in 1:4){
+    rates[j] = mean(subratings[subratings$Index==j,6])
+    se_rates[j] = sd(subratings[subratings$Index==j,6])/sqrt(dim(subratings[subratings$Index==j,])[1])
+    segments(xs[j],(rates[j]+se_rates[j]+1)/2,xs[j],(rates[j]-se_rates[j]+1)/2,lwd=2,lty=1,col = colours[i])
+  }
+  points(xs,(rates+1)/2,pch=16,col= colours[i])
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("bottomleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.7)
+
+```
+
+We seem to have a quite strong bias towards positive value notation.
