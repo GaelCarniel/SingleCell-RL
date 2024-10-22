@@ -217,6 +217,27 @@ abline(h = seq(.25,.75,.25),col = colours,lty=2)
 legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
 ```
 
+Seulement pour les non-social
+
+```{r}
+plot(numeric(0), xlim = c(0, 45), ylim = c(0, 1), main = "RL simulation (Social Data)",ylab = "Oponent Strength (averaged)",xlab="Trials")
+
+cond = levels(as.factor(conditions[,1]))[c(2,3,1)]#To obtain Low Med High
+for (i in 1:length(cond)){
+  sub = subset(V_stack[,4:dim(V_stack)[2]],V_stack[,2]==cond[i] & V_stack[,3]=='NonSocial')
+  #print(paste("Condition:",cond[i],dim(sub)[1],"rows."))
+  
+  #To ensure that everything is numeric
+  sub1 <- as.data.frame(sub)
+  sub1[] <- lapply(sub1, as.numeric)
+  y = colMeans(sub1) 
+  
+  lines(0:45,1-y ,col = colours[i],lwd=3)
+}
+abline(h = seq(.25,.75,.25),col = colours,lty=2)
+legend("topleft",legend = c("Low","Med","High"),col = colours,lty=1,lwd=2,cex=0.8)
+```
+
 ## Now let's see if there is a correlation between $PE$ and the number of spikes by trial
 
 ### Table management:
